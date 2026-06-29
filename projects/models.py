@@ -25,8 +25,6 @@ class Project(models.Model):
         OPEN = 'open', 'Открыт'
         CLOSED = 'closed', 'Закрыт'
 
-    STATUS_MAX_LENGTH = max(len(status) for status, _ in Status.choices)
-
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -40,7 +38,7 @@ class Project(models.Model):
     description = models.TextField(blank=True, verbose_name='Описание')
     github_url = models.URLField(blank=True, verbose_name='Ссылка на GitHub')
     status = models.CharField(
-        max_length=STATUS_MAX_LENGTH,
+        max_length=max(len(status) for status, _ in Status.choices),
         choices=Status.choices,
         default=Status.OPEN,
         verbose_name='Статус'
