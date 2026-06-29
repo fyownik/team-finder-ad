@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
                             ('closed', 'Закрыт'),
                         ],
                         default='open',
-                        max_length=20,
+                        max_length=6,
                         verbose_name='Статус',
                     ),
                 ),

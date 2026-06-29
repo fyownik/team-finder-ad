@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.db import models
 
+from .constants import PROJECT_NAME_MAX_LENGTH, SKILL_NAME_MAX_LENGTH
+
 
 class Skill(models.Model):
     name = models.CharField(
-        max_length=100,
+        max_length=SKILL_NAME_MAX_LENGTH,
         unique=True,
         verbose_name='Название навыка'
     )
@@ -23,17 +25,22 @@ class Project(models.Model):
         OPEN = 'open', 'Открыт'
         CLOSED = 'closed', 'Закрыт'
 
+    STATUS_MAX_LENGTH = max(len(status) for status, _ in Status.choices)
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='owned_projects',
         verbose_name='Автор'
     )
-    name = models.CharField(max_length=200, verbose_name='Название')
+    name = models.CharField(
+        max_length=PROJECT_NAME_MAX_LENGTH,
+        verbose_name='Название'
+    )
     description = models.TextField(blank=True, verbose_name='Описание')
     github_url = models.URLField(blank=True, verbose_name='Ссылка на GitHub')
     status = models.CharField(
-        max_length=20,
+        max_length=STATUS_MAX_LENGTH,
         choices=Status.choices,
         default=Status.OPEN,
         verbose_name='Статус'
@@ -56,8 +63,14 @@ class Project(models.Model):
         blank=True,
         verbose_name='Необходимые навыки'
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
 
     class Meta:
         ordering = ['-created_at']

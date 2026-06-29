@@ -7,12 +7,11 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ('name', 'description', 'github_url', 'status')
-        labels = {
-            'name': 'Название проекта',
-            'description': 'Описание проекта',
-            'github_url': 'Ссылка на GitHub репозиторий',
-            'status': 'Статус',
-        }
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
-        }
+
+    def clean_github_url(self):
+        github_url = self.cleaned_data.get('github_url')
+        if github_url and 'github.com' not in github_url:
+            raise forms.ValidationError(
+                'Укажите ссылку на репозиторий GitHub.'
+            )
+        return github_url

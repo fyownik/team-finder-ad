@@ -4,6 +4,8 @@ import django.contrib.auth.models
 import django.utils.timezone
 from django.db import migrations, models
 
+import users.constants
+
 
 class Migration(migrations.Migration):
 
@@ -83,8 +85,20 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='Email')),
-                ('name', models.CharField(max_length=150, verbose_name='Имя')),
-                ('surname', models.CharField(max_length=150, verbose_name='Фамилия')),
+                (
+                    'name',
+                    models.CharField(
+                        max_length=users.constants.USER_NAME_MAX_LENGTH,
+                        verbose_name='Имя',
+                    ),
+                ),
+                (
+                    'surname',
+                    models.CharField(
+                        max_length=users.constants.USER_NAME_MAX_LENGTH,
+                        verbose_name='Фамилия',
+                    ),
+                ),
                 (
                     'avatar',
                     models.ImageField(
@@ -95,7 +109,14 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ('about', models.TextField(blank=True, verbose_name='О себе')),
-                ('phone', models.CharField(blank=True, max_length=30, verbose_name='Телефон')),
+                (
+                    'phone',
+                    models.CharField(
+                        blank=True,
+                        max_length=users.constants.USER_PHONE_MAX_LENGTH,
+                        verbose_name='Телефон',
+                    ),
+                ),
                 ('github_url', models.URLField(blank=True, verbose_name='GitHub')),
                 (
                     'groups',

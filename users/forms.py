@@ -1,7 +1,11 @@
+from urllib.parse import urlparse
+
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.forms import AuthenticationForm
+
+from .constants import GITHUB_HOST, GITHUB_URL_ERROR
 
 
 User = get_user_model()
@@ -34,7 +38,6 @@ class UserLoginForm(AuthenticationForm):
         label='Email',
         widget=forms.EmailInput
     )
-
     def clean(self):
         email = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
@@ -47,7 +50,6 @@ class UserLoginForm(AuthenticationForm):
             if self.user_cache is None:
                 raise self.get_invalid_login_error()
             self.confirm_login_allowed(self.user_cache)
-
         return self.cleaned_data
 
 
@@ -63,13 +65,11 @@ class UserProfileForm(forms.ModelForm):
             'github_url',
         )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['avatar'].required = False
-        self.fields['about'].required = False
-        self.fields['phone'].required = False
-        self.fields['github_url'].required = False
-
-
-class UserPasswordChangeForm(PasswordChangeForm):
-    pass
+    def clean_github_url(self):
+        github_url = self.cleaned_data.get('github_url')
+        if github_url:
+            netloc = urlparse(github_url).netloc.lower()
+            valid_hosts = {GITHUB_HOST, f'www.{GITHUB_HOST}'}
+            if netloc not in valid_hosts:
+                raise forms.ValidationError(GITHUB_URL_ERROR)
+        return github_url
