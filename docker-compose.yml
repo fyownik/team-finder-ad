@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    container_name: teamfinder_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: teamfinder_web
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      DJANGO_ALLOWED_HOSTS: "*"
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
+    volumes:
+      - .:/app
+      - media_data:/app/media
+      - ./staticfiles:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn team_finder.wsgi:application --bind 0.0.0.0:8000"
+
+  gateway:
+    image: nginx:1.25.3-alpine
+    container_name: teamfinder_gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./staticfiles:/var/html/static/:ro
+      - media_data:/var/html/media/
+    depends_on:
+      - web
+    restart: always
+
+volumes:
+  postgres_data:
+  media_data:
